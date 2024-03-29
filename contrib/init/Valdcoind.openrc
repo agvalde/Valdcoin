@@ -1,0 +1,93 @@
+#!/sbin/openrc-run
+
+# backward compatibility for existing gentoo layout 
+#
+if [ -d "/var/lib/valdcoin/.valdcoin" ]; then
+	VALDCOIND_DEFAULT_DATADIR="/var/lib/valdcoin/.valdcoin"
+else
+	VALDCOIND_DEFAULT_DATADIR="/var/lib/valdcoind"
+fi
+
+VALDCOIND_CONFIGFILE=${VALDCOIND_CONFIGFILE:-/etc/valdcoin/valdcoin.conf}
+VALDCOIND_PIDDIR=${VALDCOIND_PIDDIR:-/var/run/valdcoind}
+VALDCOIND_PIDFILE=${VALDCOIND_PIDFILE:-${VALDCOIND_PIDDIR}/valdcoind.pid}
+VALDCOIND_DATADIR=${VALDCOIND_DATADIR:-${VALDCOIND_DEFAULT_DATADIR}}
+VALDCOIND_USER=${VALDCOIND_USER:-${VALDCOIN_USER:-valdcoin}}
+VALDCOIND_GROUP=${VALDCOIND_GROUP:-valdcoin}
+VALDCOIND_BIN=${VALDCOIND_BIN:-/usr/bin/valdcoind}
+VALDCOIND_NICE=${VALDCOIND_NICE:-${NICELEVEL:-0}}
+VALDCOIND_OPTS="${VALDCOIND_OPTS:-${VALDCOIN_OPTS}}"
+
+name="Valdcoin Core Daemon"
+description="Valdcoin cryptocurrency P2P network daemon"
+
+command="/usr/bin/valdcoind"
+command_args="-pid=\"${VALDCOIND_PIDFILE}\" \
+		-conf=\"${VALDCOIND_CONFIGFILE}\" \
+		-datadir=\"${VALDCOIND_DATADIR}\" \
+		-daemon \
+		${VALDCOIND_OPTS}"
+
+required_files="${VALDCOIND_CONFIGFILE}"
+start_stop_daemon_args="-u ${VALDCOIND_USER} \
+			-N ${VALDCOIND_NICE} -w 2000"
+pidfile="${VALDCOIND_PIDFILE}"
+
+# The retry schedule to use when stopping the daemon. Could be either
+# a timeout in seconds or multiple signal/timeout pairs (like
+# "SIGKILL/180 SIGTERM/300")
+retry="${VALDCOIND_SIGTERM_TIMEOUT}"
+
+depend() {
+	need localmount net
+}
+
+# verify
+# 1) that the datadir exists and is writable (or create it)
+# 2) that a directory for the pid exists and is writable
+# 3) ownership and permissions on the config file
+start_pre() {
+	checkpath \
+	-d \
+	--mode 0750 \
+	--owner "${VALDCOIND_USER}:${VALDCOIND_GROUP}" \
+	"${VALDCOIND_DATADIR}"
+
+	checkpath \
+	-d \
+	--mode 0755 \
+	--owner "${VALDCOIND_USER}:${VALDCOIND_GROUP}" \
+	"${VALDCOIND_PIDDIR}"
+
+	checkpath -f \
+	-o "${VALDCOIND_USER}:${VALDCOIND_GROUP}" \
+	-m 0660 \
+	"${VALDCOIND_CONFIGFILE}"
+
+	checkconfig || return 1
+}
+
+checkconfig()
+{
+	if grep -qs '^rpcuser=' "${VALDCOIND_CONFIGFILE}" && \
+		! grep -qs '^rpcpassword=' "${VALDCOIND_CONFIGFILE}" ; then
+		eerror ""
+		eerror "ERROR: You must set a secure rpcpassword to run valdcoind."
+		eerror "The setting must appear in ${VALDCOIND_CONFIGFILE}"
+		eerror ""
+		eerror "This password is security critical to securing wallets "
+		eerror "and must not be the same as the rpcuser setting."
+		eerror "You can generate a suitable random password using the following "
+		eerror "command from the shell:"
+		eerror ""
+		eerror "bash -c 'tr -dc a-zA-Z0-9 < /dev/urandom | head -c32 && echo'"
+		eerror ""
+		eerror "It is recommended that you also set alertnotify so you are "
+		eerror "notified of problems:"
+		eerror ""
+		eerror "ie: alertnotify=echo %%s | mail -s \"Valdcoin Alert\"" \
+			"admin@foo.com"
+		eerror ""
+		return 1
+	fi
+}

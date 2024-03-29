@@ -1,0 +1,7 @@
+[main]
+host = https://www.transifex.com
+
+[o:valdcoin:p:valdcoin:r:qt-translation-025x]
+file_filter = src/qt/locale/valdcoin_<lang>.xlf
+source_file = src/qt/locale/valdcoin_en.xlf
+source_lang = en

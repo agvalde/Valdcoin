@@ -1,0 +1,33 @@
+# /etc/conf.d/valdcoind: config file for /etc/init.d/valdcoind
+
+# Config file location
+#VALDCOIND_CONFIGFILE="/etc/valdcoin/valdcoin.conf"
+
+# What directory to write pidfile to?  (created and owned by $VALDCOIND_USER)
+#VALDCOIND_PIDDIR="/var/run/valdcoind"
+
+# What filename to give the pidfile
+#VALDCOIND_PIDFILE="${VALDCOIND_PIDDIR}/valdcoind.pid"
+
+# Where to write valdcoind data (be mindful that the blockchain is large)
+#VALDCOIND_DATADIR="/var/lib/valdcoind"
+
+# User and group to own valdcoind process
+#VALDCOIND_USER="valdcoin"
+#VALDCOIND_GROUP="valdcoin"
+
+# Path to valdcoind executable
+#VALDCOIND_BIN="/usr/bin/valdcoind"
+
+# Nice value to run valdcoind under
+#VALDCOIND_NICE=0
+
+# Additional options (avoid -conf and -datadir, use flags above)
+#VALDCOIND_OPTS=""
+
+# The timeout in seconds OpenRC will wait for valdcoind to terminate
+# after a SIGTERM has been raised.
+# Note that this will be mapped as argument to start-stop-daemon's
+# '--retry' option, which means you can specify a retry schedule
+# here. For more information see man 8 start-stop-daemon.
+VALDCOIND_SIGTERM_TIMEOUT=600

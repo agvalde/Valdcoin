@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Valdcoin Core Security Policy
+    url: https://github.com/valdcoin/valdcoin/blob/master/SECURITY.md
+    about: View security policy
+  - name: Valdcoin Core Developers
+    url: https://valdcoincore.org
+    about: Valdcoin Core homepage

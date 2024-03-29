@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+#
+#  valdcoind The valdcoin core server.
+#
+#
+# chkconfig: 345 80 20
+# description: valdcoind
+# processname: valdcoind
+#
+
+# Source function library.
+. /etc/init.d/functions
+
+# you can override defaults in /etc/sysconfig/valdcoind, see below
+if [ -f /etc/sysconfig/valdcoind ]; then
+        . /etc/sysconfig/valdcoind
+fi
+
+RETVAL=0
+
+prog=valdcoind
+# you can override the lockfile via VALDCOIND_LOCKFILE in /etc/sysconfig/valdcoind
+lockfile=${VALDCOIND_LOCKFILE-/var/lock/subsys/valdcoind}
+
+# valdcoind defaults to /usr/bin/valdcoind, override with VALDCOIND_BIN
+valdcoind=${VALDCOIND_BIN-/usr/bin/valdcoind}
+
+# valdcoind opts default to -disablewallet, override with VALDCOIND_OPTS
+valdcoind_opts=${VALDCOIND_OPTS--disablewallet}
+
+start() {
+    echo -n $"Starting $prog: "
+    daemon $DAEMONOPTS $valdcoind $valdcoind_opts
+    RETVAL=$?
+    echo
+    [ $RETVAL -eq 0 ] && touch $lockfile
+    return $RETVAL
+}
+
+stop() {
+    echo -n $"Stopping $prog: "
+    killproc $prog -t600
+    RETVAL=$?
+    echo
+    [ $RETVAL -eq 0 ] && rm -f $lockfile
+    return $RETVAL
+}
+
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    status)
+        status $prog
+        ;;
+    restart)
+        stop
+        start
+        ;;
+    *)
+        echo "Usage: service $prog {start|stop|status|restart}"
+        exit 1
+        ;;
+esac
