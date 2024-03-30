@@ -394,8 +394,7 @@ const CBlockIndex* BlockManager::GetLastCheckpoint(const CCheckpointData& data)
         const uint256& hash = i.second;
         const CBlockIndex* pindex = LookupBlockIndex(hash);
         if (pindex) {
-            //return pindex;
-            return null;
+            return pindex; 
         }
     }
     return nullptr;
